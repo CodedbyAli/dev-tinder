@@ -3,22 +3,22 @@ const mongoose = require('mongoose')
 
 const userSchema = mongoose.Schema({
     firstName: {
-        type: string
+        type: String
     },
     lastName: {
-        type: string
+        type: String
     },
     email: {
-        type: string
+        type: String
     },
     password: {
-        type: string
+        type: String
     },
     age: {
-        type: number
+        type: Number
     },
     gender: {
-        type: string
+        type: String
     }
 });
 
