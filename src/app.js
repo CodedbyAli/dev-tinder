@@ -1,21 +1,82 @@
 const express = require('express');
 const connectDB = require('./config/database');
 const User = require('./models/User')
+const bcrypt = require('bcrypt');
+const cookieParser = require('cookie-parser');
+const jwt = require('jsonwebtoken');
 
 const app = express();
 
 app.use(express.json());
+app.use(cookieParser())
 
 // SignUp
 app.post('/signup', async(req,res) => {
   const data = req.body;
 
   try{
+
+    data.password = await bcrypt.hash(data.password, 10);
+
     await User.create(data);
     res.send("User created successfuly");
   } catch(err) {
     res.status(400).send("Error while creating user: " + err.message);
   }
+})
+
+// Login
+app.post('/login', async (req,res) => {
+  const data = req.body;
+
+  try{
+
+    const user = await User.findOne({ email: data.email })
+    if(!user){
+      throw new Error("Invalid Credentials!");
+    }
+
+    const isPasswordCorrect = await bcrypt.compare(data.password, user.password);
+
+    if(!isPasswordCorrect)
+    {
+      throw new Error("Invalid Credentials");
+    }
+
+    const token = jwt.sign({ _id: user._id }, 'Private@Key');
+
+    res.cookie("token", token);
+    res.send("User is logged in successfully")
+
+  }catch(err){
+    res.status(400).send(err.message);
+  }
+  
+})
+
+app.get('/profile', async (req,res) => {
+  const {token} = req.cookies;
+  try{
+
+    const {_id} = jwt.verify(token, 'Private@Key');
+    const user = await User.findById(_id);
+    if(!user){
+      throw new Error("Error occured while fetching user profile");
+    }
+    const data = {
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      age: user.age,
+      gender: user.gender,
+      skills: user.skills,
+    }
+    res.send(data);
+
+  }catch(err){
+    res.status(400).send(err.message);
+  }
+
 })
 
 // Get Users
