@@ -4,6 +4,7 @@ const User = require('./models/User')
 const bcrypt = require('bcrypt');
 const cookieParser = require('cookie-parser');
 const jwt = require('jsonwebtoken');
+const {userAuth} = require('./middlewares/auth');
 
 const app = express();
 
@@ -43,7 +44,7 @@ app.post('/login', async (req,res) => {
       throw new Error("Invalid Credentials");
     }
 
-    const token = jwt.sign({ _id: user._id }, 'Private@Key');
+    const token = jwt.sign({ _id: user._id }, 'Private@Key', {expiresIn: '1d'});
 
     res.cookie("token", token);
     res.send("User is logged in successfully")
@@ -54,15 +55,11 @@ app.post('/login', async (req,res) => {
   
 })
 
-app.get('/profile', async (req,res) => {
-  const {token} = req.cookies;
+app.get('/profile', userAuth, (req,res) => {
+
   try{
 
-    const {_id} = jwt.verify(token, 'Private@Key');
-    const user = await User.findById(_id);
-    if(!user){
-      throw new Error("Error occured while fetching user profile");
-    }
+    const user = req.body;
     const data = {
       firstName: user.firstName,
       lastName: user.lastName,
