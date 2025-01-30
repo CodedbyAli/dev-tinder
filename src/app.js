@@ -3,7 +3,6 @@ const connectDB = require('./config/database');
 const User = require('./models/User')
 const bcrypt = require('bcrypt');
 const cookieParser = require('cookie-parser');
-const jwt = require('jsonwebtoken');
 const {userAuth} = require('./middlewares/auth');
 
 const app = express();
@@ -37,14 +36,14 @@ app.post('/login', async (req,res) => {
       throw new Error("Invalid Credentials!");
     }
 
-    const isPasswordCorrect = await bcrypt.compare(data.password, user.password);
+    const isPasswordCorrect = await user.validPassword(data.password);
 
     if(!isPasswordCorrect)
     {
       throw new Error("Invalid Credentials");
     }
 
-    const token = jwt.sign({ _id: user._id }, 'Private@Key', {expiresIn: '1d'});
+    const token = await user.getJwt();
 
     res.cookie("token", token);
     res.send("User is logged in successfully")
