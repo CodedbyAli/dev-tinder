@@ -10,6 +10,7 @@ profileRouter.get('/profile/view', userAuth, (req,res) => {
 
     const user = req.user;
     const data = {
+      _id: user._id,
       firstName: user.firstName,
       lastName: user.lastName,
       email: user.email,
