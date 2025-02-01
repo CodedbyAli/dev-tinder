@@ -5,13 +5,13 @@ const userAuth = async (req,res, next) => {
     const {token} = req.cookies;
 
     try{
-    
+        
         const {_id} = jwt.verify(token, 'Private@Key');
         const user = await User.findById(_id);
         if(!user){
           throw new Error("Error occured while fetching user profile");
         }else{
-            req.body = user;
+            req.user = user;
             next();
         }
 

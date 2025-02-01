@@ -1,13 +1,15 @@
 const express = require('express');
 const {userAuth} = require('../middlewares/auth');
-const User = require('../models/User')
+const User = require('../models/User');
 const profileRouter = express.Router();
+const {validateProfileUpdate} = require('../utils/validation');
 
-profileRouter.get('/profile', userAuth, (req,res) => {
+// Get User Profile
+profileRouter.get('/profile/view', userAuth, (req,res) => {
 
   try{
 
-    const user = req.body;
+    const user = req.user;
     const data = {
       firstName: user.firstName,
       lastName: user.lastName,
@@ -24,65 +26,25 @@ profileRouter.get('/profile', userAuth, (req,res) => {
 
 })
 
-
-// Get Users
-profileRouter.get('/users', async(req,res) => {
-    try{
-      const user = await User.find({});
-      res.send(user);
-    }catch(err){
-      res.status(404).send(err.message);
-    }
-  });
+// Update User Profile
+profileRouter.patch('/profile/edit', userAuth, async (req,res) => {
+  const reqData = req.body;
+  const loggedInUser = req.user;
   
-// Get User
-profileRouter.get('/user', async (req,res) => {
-try{
-    
-    const user = await User.findOne({ email: 'ali2@example.com' });
-    res.send(user);
-
-}catch(err){
-    res.status(400).send("Error Occur while fetching a User")
-}
-})
-
-// Delete User
-profileRouter.delete('/user/:userId', async (req,res) => {
-const {userId} = req.params;
-
-try{
-    await User.deleteOne({ _id: userId });
-    res.send("User Deleted Successfully");
-}catch(err){
-    res.status(400).send("Error while deleting user: " + err.message);
-}
-})
-
-
-// Update User
-profileRouter.patch('/user/:userId', async (req,res) => {
-const {userId} = req.params;
-const data = req.body;
-
 try{
 
-    const ALLOWED_UPDATES = ['age', 'gender', 'skills'];
-
-    const isUpdateAllow = Object.keys(data).every((k) => ALLOWED_UPDATES.includes(k));
-    if(!isUpdateAllow)
+    if(!validateProfileUpdate(reqData))
     {
-    throw new Error("Update is not Allowed");
+      throw new Error("Update is not Allowed");
     }
 
-    if(data?.skills?.length > 10)
+    if(reqData?.skills?.length > 10)
     {
-    throw new Error("Skills cannot be more than 10");
+      throw new Error("Skills cannot be more than 10");
     }
 
-    await User.findByIdAndUpdate({_id:userId}, data, {
-    returnDocument: "after",
-    });
+    Object.keys(reqData).forEach((key) => (loggedInUser[key] = reqData[key]));
+    await loggedInUser.save();
 
     res.send("User is updated successfully");
 
