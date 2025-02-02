@@ -39,8 +39,20 @@ try{
 
     const token = await user.getJwt();
 
+    const resData = {
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      age: user.age,
+      gender: user.gender,
+      skills: user.skills,
+    }
+
     res.cookie("token", token);
-    res.send("User is logged in successfully")
+    res.json({
+      message: 'User Logged In successfully',
+      data: resData
+    })
 
 }catch(err){
     res.status(400).send(err.message);
