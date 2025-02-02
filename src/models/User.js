@@ -40,6 +40,15 @@ const userSchema = mongoose.Schema({
             }
         }
     },
+    imageUrl: {
+        type: String,
+        validate(value){
+            if(!validator.isURL(value))
+            {
+                throw new Error("Invalid Url: " + value);
+            }
+        }
+    },
     age: {
         type: Number,
         min: 15,

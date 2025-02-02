@@ -44,6 +44,7 @@ try{
       lastName: user.lastName,
       email: user.email,
       age: user.age,
+      imageUrl: user.imageUrl,
       gender: user.gender,
       skills: user.skills,
     }
