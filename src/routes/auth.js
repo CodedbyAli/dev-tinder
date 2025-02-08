@@ -12,8 +12,20 @@ authRouter.post('/signup', async(req,res) => {
   
       data.password = await bcrypt.hash(data.password, 10);
   
-      await User.create(data);
-      res.send("User created successfuly");
+      const savedUser = await User.create(data);
+
+      const token = await savedUser.getJwt();
+
+      const resData = {
+        firstName: savedUser.firstName,
+        lastName: savedUser.lastName,
+      }
+
+      res.cookie("token", token, {
+        expires: new Date(Date.now() + 8 * 3600000), // 8 Hours
+      });
+
+      res.json({message: "User created successfully", data: resData});
     } catch(err) {
       res.status(400).send("Error while creating user: " + err.message);
     }
@@ -49,7 +61,9 @@ try{
       skills: user.skills,
     }
 
-    res.cookie("token", token);
+    res.cookie("token", token, {
+      expires: new Date(Date.now() + 8 * 3600000), // 8 Hours
+    });
     res.json({
       message: 'User Logged In successfully',
       data: resData

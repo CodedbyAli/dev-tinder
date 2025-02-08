@@ -8,14 +8,14 @@ const userSchema = mongoose.Schema({
     firstName: {
         type: String,
         required: true,
-        min:3,
-        max:4
+        minLength:3,
+        maxLength: 25
     },
     lastName: {
         type: String,
         required: true,
-        min:3,
-        max:4
+        minLength:3,
+        maxLength: 25
     },
     email: {
         type: String,
@@ -32,7 +32,6 @@ const userSchema = mongoose.Schema({
     password: {
         type: String,
         required: true,
-        minLength: 6,
         validate(value){
             if(!validator.isStrongPassword(value))
             {
@@ -56,7 +55,6 @@ const userSchema = mongoose.Schema({
     },
     gender: {
         type: String,
-        required: true,
         // validate: {
         //     validator: function(v){
         //         return ['Male','Female','Other'].includes(v);
@@ -70,9 +68,18 @@ const userSchema = mongoose.Schema({
             }
         }
     },
+    about: {
+        type: String,
+        maxLength: 255,
+    },
     skills: {
-        type: Array,
-        required: true
+        type: [String],
+        validate: {
+            validator: function (skills) {
+                return Array.isArray(skills) && skills.length <= 100;
+            },
+            message: "Skills cannot be more than 10"
+        }
     }
 },
 {

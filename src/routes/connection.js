@@ -113,7 +113,7 @@ connectionRouter.get('/connections/recieved', userAuth, async (req,res) => {
         const allConnections = await Connection.find({
             toUserId: user._id,
             status: 'INTERESTED'
-        }).populate('fromUserId', ['firstName', 'lastName']);
+        }).populate('fromUserId', ['firstName', 'lastName', 'age', 'gender', 'imageUrl']);
 
         if(!allConnections)
         {
@@ -142,8 +142,8 @@ connectionRouter.get('/connections/confirmed', userAuth, async (req,res)=>{
                 {fromUserId: loggedInUser._id, status: 'ACCEPTED'},
             ]
         })
-        .populate('toUserId', ['firstName', 'lastName', 'age', 'gender', 'skills'])
-        .populate('fromUserId', ['firstName', 'lastName', 'age', 'gender', 'skills']);
+        .populate('toUserId', ['firstName', 'lastName', 'age', 'gender', 'skills', 'imageUrl'])
+        .populate('fromUserId', ['firstName', 'lastName', 'age', 'gender', 'skills', 'imageUrl']);
         if(!connectionRequests)
         {
             req.status(404).json({
@@ -161,7 +161,7 @@ connectionRouter.get('/connections/confirmed', userAuth, async (req,res)=>{
         .filter(user => user !== undefined); //ensures you wouldn’t have undefined values in your final data
 
         res.json({
-            message: data
+            data
         })
 
     }catch(err)

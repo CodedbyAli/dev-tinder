@@ -35,7 +35,7 @@ userRouter.get('/feed', userAuth, async (req,res) => {
         .skip(skip)
         .limit(limit);
 
-        res.json({ data: users });
+        res.json({ users });
 
         }
     catch(err){
